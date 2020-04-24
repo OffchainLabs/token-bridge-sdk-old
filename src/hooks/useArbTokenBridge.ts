@@ -59,6 +59,7 @@ export interface BridgeBalance {
   arbChainBalance: utils.BigNumber
   totalArbBalance: utils.BigNumber
   lockBoxBalance: utils.BigNumber
+  asset: string
 }
 
 // removing 'tokens' / 'balance' could result in one interface
@@ -67,6 +68,7 @@ export interface ERC721Balance {
   arbChainTokens: utils.BigNumber[]
   totalArbTokens: utils.BigNumber[]
   lockBoxTokens: utils.BigNumber[]
+  asset: string
 }
 
 interface BridgeConfig {
@@ -98,7 +100,8 @@ export const useArbTokenBridge = (
     balance: constants.Zero,
     arbChainBalance: constants.Zero,
     totalArbBalance: constants.Zero,
-    lockBoxBalance: constants.Zero
+    lockBoxBalance: constants.Zero,
+    asset: ""
   })
   const [erc20Balances, setErc20Balances] = useState<
     ContractStorage<BridgeBalance>
@@ -159,7 +162,8 @@ export const useArbTokenBridge = (
       balance,
       arbChainBalance,
       lockBoxBalance,
-      totalArbBalance
+      totalArbBalance,
+      asset: "ETH"
     }
 
     let different = true
@@ -285,7 +289,8 @@ export const useArbTokenBridge = (
               tokens,
               arbChainTokens,
               totalArbTokens,
-              lockBoxTokens
+              lockBoxTokens,
+              asset: contract.symbol
             }
 
             erc721Updates[contract.eth.address] = updated
