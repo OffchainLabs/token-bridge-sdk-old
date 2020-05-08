@@ -367,6 +367,7 @@ export const useArbTokenBridge = (
         return { ...update, pendingWithdrawals: oldBalances.pendingWithdrawals }
       })
     }
+    return update
   }, [arbProvider, ethBalances, vmId, walletAddress, walletIndex])
 
   const depositEth = useCallback(
@@ -446,7 +447,7 @@ export const useArbTokenBridge = (
 
   // TODO targeted token updates to prevent unneeded iteration
   const updateTokenBalances = useCallback(
-    async (type?: TokenType): Promise<void> => {
+    async (type?: TokenType)=> {
       if (!arbProvider || !walletAddress)
         throw new Error('updateTokenBalances missing req')
 
@@ -529,6 +530,10 @@ export const useArbTokenBridge = (
           mergeAndPreservePWs<ERC721Balance>(balances, erc721Updates)
         )
       }
+      return {
+        erc20: erc20Updates,
+        erc721: erc721Updates
+      }
     },
     [
       arbProvider,
@@ -540,7 +545,7 @@ export const useArbTokenBridge = (
     ]
   )
   const approveToken = useCallback(
-    async (contractAddress: string) => {
+    async (contractAddress: string): Promise<ContractReceipt> => {
       if (!arbProvider) throw new Error('approve missing provider')
 
       const contract = bridgeTokens[contractAddress]
@@ -579,7 +584,7 @@ export const useArbTokenBridge = (
         }
       })
 
-      return {tx, receipt}
+      return receipt
     },
     [arbProvider, bridgeTokens]
   )
