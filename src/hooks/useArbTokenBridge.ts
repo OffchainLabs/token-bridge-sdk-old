@@ -112,7 +112,7 @@ interface BridgeConfig {
 const pWToPWCache = (
   pW: PendingWithdrawal,
   type: AssetType,
-  address?: string
+  address: string
 ): PendingWithdrawalCache => {
   return { ...pW, value: pW.value.toString(), type, address }
 }
@@ -262,12 +262,13 @@ export const useArbTokenBridge = (
   const addToPWCache = (
     pW: PendingWithdrawal,
     nodeHash: string,
-    type: AssetType
+    type: AssetType,
+    address: string
   ) => {
     // converts bignum to number for local storage
     setPWsCache({
       ...pWsCache,
-      [nodeHash]: pWToPWCache(pW, type)
+      [nodeHash]: pWToPWCache(pW, type, address)
     })
   }
 
@@ -280,6 +281,10 @@ export const useArbTokenBridge = (
   }
 
   const addCachedPWsToBalances = useCallback(() => {
+    if (!walletAddress){
+      console.warn('Warning: wallet address not yet loaded');
+      return
+    }
     const ethBalanceCopy: BridgeBalance = cloneDeep(ethBalances)
     const erc20BalancesCopy: ContractStorage<BridgeBalance> = cloneDeep(
       erc20Balances
@@ -294,6 +299,10 @@ export const useArbTokenBridge = (
 
     for (const nodeHash in pWsCache) {
       const pWCache = pWsCache[nodeHash]
+      // skip withdrawals that aren't the current user's
+      if (pWCache.address !== walletAddress){
+        continue
+      }
       const pW = pWCacheToPW(pWCache)
       switch (pWCache.type) {
         case AssetType.ETH: {
@@ -336,7 +345,7 @@ export const useArbTokenBridge = (
     if (erc721Update) {
       setErc721Balances(erc721BalancesCopy)
     }
-  }, [ethBalances, erc20Balances, erc721Balances])
+  }, [ethBalances, erc20Balances, erc721Balances, walletAddress])
 
   /*
   ETH METHODS:
@@ -431,7 +440,7 @@ export const useArbTokenBridge = (
             ] = pendingWithdrawal
             return newEthBalances
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ETH)
+          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ETH, walletAddress)
         })
         return receipt
       } catch (e) {
@@ -700,7 +709,7 @@ export const useArbTokenBridge = (
               [contractAddress]: newBalance
             }
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC20)
+          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC20, walletAddress)
         } else if (contract.type === TokenType.ERC721) {
           setErc721Balances(oldERC721Balances => {
             const balance = oldERC721Balances?.[contractAddress]
@@ -718,7 +727,7 @@ export const useArbTokenBridge = (
               [contractAddress]: newBalance
             }
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC721)
+          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC721, walletAddress)
         }
       })
 
