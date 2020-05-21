@@ -281,8 +281,8 @@ export const useArbTokenBridge = (
   }
 
   const addCachedPWsToBalances = useCallback(() => {
-    if (!walletAddress){
-      console.warn('Warning: wallet address not yet loaded');
+    if (!walletAddress) {
+      console.warn('Warning: wallet address not yet loaded')
       return
     }
     const ethBalanceCopy: BridgeBalance = cloneDeep(ethBalances)
@@ -300,7 +300,7 @@ export const useArbTokenBridge = (
     for (const nodeHash in pWsCache) {
       const pWCache = pWsCache[nodeHash]
       // skip withdrawals that aren't the current user's
-      if (pWCache.address !== walletAddress){
+      if (pWCache.address !== walletAddress) {
         continue
       }
       const pW = pWCacheToPW(pWCache)
@@ -440,7 +440,12 @@ export const useArbTokenBridge = (
             ] = pendingWithdrawal
             return newEthBalances
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ETH, walletAddress)
+          addToPWCache(
+            pendingWithdrawal,
+            data.validNodeHash,
+            AssetType.ETH,
+            walletAddress
+          )
         })
         return receipt
       } catch (e) {
@@ -709,7 +714,12 @@ export const useArbTokenBridge = (
               [contractAddress]: newBalance
             }
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC20, walletAddress)
+          addToPWCache(
+            pendingWithdrawal,
+            data.validNodeHash,
+            AssetType.ERC20,
+            walletAddress
+          )
         } else if (contract.type === TokenType.ERC721) {
           setErc721Balances(oldERC721Balances => {
             const balance = oldERC721Balances?.[contractAddress]
@@ -727,7 +737,12 @@ export const useArbTokenBridge = (
               [contractAddress]: newBalance
             }
           })
-          addToPWCache(pendingWithdrawal, data.validNodeHash, AssetType.ERC721, walletAddress)
+          addToPWCache(
+            pendingWithdrawal,
+            data.validNodeHash,
+            AssetType.ERC721,
+            walletAddress
+          )
         }
       })
 
@@ -817,10 +832,10 @@ export const useArbTokenBridge = (
       const isEthContract =
         (await arbProvider.ethProvider.getCode(contractAddress)).length > 2
       if (!isEthContract) {
-        console.warn('contract not deployed');
+        console.warn('contract not deployed')
         return ''
-      }
-      else if (bridgeTokens[contractAddress]) throw Error('token already added')
+      } else if (bridgeTokens[contractAddress])
+        throw Error('token already added')
 
       const inboxManager = await arbProvider.globalInboxConn()
 
